@@ -3,14 +3,11 @@ from sentence import SentenceReader
 import os
 
 
-CNN_TOKENS_PATH = "C:\\Users\\Nicolas\\Documents\Passau\\Text Mining Project\\PROJECT\\cnn_stories_tokenized"
-DM_TOKENS_PATH = "C:\\Users\\Nicolas\\Documents\Passau\\Text Mining Project\\PROJECT\\dm_stories_tokenized"
-VECTOR_LENGTH = 300
+CNN_TOKENS_PATH = "C:\\Users\\Nicolas\\Desktop\\NLP Data\\cnn-dailymail-master\\cnn_stories_tokenized"
+DM_TOKENS_PATH = "C:\\Users\\Nicolas\\Desktop\\NLP Data\\cnn-dailymail-master\\dm_stories_tokenized"
+VECTOR_LENGTH = 100
 WINDOW = 5
 MIN_COUNT = 5
-
-# Proportion of the input that will be used for training. The remaining data will be used for testing.
-TRAIN_RATIO = 0.9
 
 
 # Train a word2vec model with low memory usage (less efficient)
@@ -48,4 +45,6 @@ def train_high_memory():
     model.wv.save('vectors/cnn_dm_vectors_' + str(VECTOR_LENGTH) + "_" + str(WINDOW) + "_" + str(MIN_COUNT))
 
 # train_low_memory()
-# train_high_memory()
+
+
+train_high_memory()

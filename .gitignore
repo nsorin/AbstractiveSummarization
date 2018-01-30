@@ -1,2 +1,4 @@
+models/
 vectors/
 .idea/
+*.h5

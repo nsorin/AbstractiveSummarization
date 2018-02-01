@@ -11,6 +11,8 @@
 
 + The preprocessed CNN-Dailymail dataset: https://github.com/abisee/cnn-dailymail
 
++ gensim to generate vectors https://radimrehurek.com/gensim/index.html
+
 ## Content
 
 + word2vec.py: Create word vectors from tokenized CNN-dailymail dataset

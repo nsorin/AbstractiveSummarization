@@ -19,4 +19,4 @@
 
 + input_vectors.py: Converts the tokenized files to numpy arrays of vectors
 
-+ test.py: Train a sequence to sequence model on CNN data
++ train_model.py: Train a sequence to sequence model on CNN data

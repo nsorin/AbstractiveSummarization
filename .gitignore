@@ -2,3 +2,4 @@ models/
 vectors/
 .idea/
 *.h5
+__pycache__/

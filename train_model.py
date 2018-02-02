@@ -1,51 +1,30 @@
 from seq2seq.models import AttentionSeq2Seq
 import os
 import numpy as np
-from keras.models import model_from_json
+from keras.callbacks import ModelCheckpoint
+import tensorflow as tf
 
 CNN_INPUT_DIR = "D:\\cnn_stories_vectorized_100"
-BATCH_SIZE = 1
+BATCH_SIZE = 32
 INPUT_DIM = 100
 OUTPUT_DIM = 100
 HIDDEN_DIM = 40
 DEPTH = 1
-EPOCHS = 1
+EPOCHS = 5
 
 INPUT_MAX_LENGTH = 2412
 OUTPUT_MAX_LENGTH = 107
 
-TRAIN_SIZE = 0.9
+TRAIN_SIZE = 0.8
 
-LOAD_NAME = "model_0.h5"
-SAVE_NAME = "model_"
+SAVE_NAME = "model.h5"
 
 
 def build_model():
     model = AttentionSeq2Seq(input_dim=INPUT_DIM, input_length=INPUT_MAX_LENGTH, hidden_dim=HIDDEN_DIM,
                              output_length=OUTPUT_MAX_LENGTH, output_dim=OUTPUT_DIM, depth=DEPTH, batch_size=BATCH_SIZE)
-    model.compile(loss='mse', optimizer='rmsprop', sample_weight_mode="temporal")
+    model.compile(loss='mse', optimizer='sgd', sample_weight_mode="temporal")
     model.summary()
-    return model
-
-
-def save_model(model, file_name):
-    model_json = model.to_json()
-    json_name = file_name + ".json"
-    h5_name = file_name + ".h5"
-    with open(json_name, "w") as json_file:
-        json_file.write(model_json)
-    model.save_weights(h5_name)
-    print("Saved model as " + file_name)
-
-
-def load_model(file_name):
-    json_name = file_name + ".json"
-    h5_name = file_name + ".h5"
-    json_file = open(json_name, "r")
-    model_json = json_file.read()
-    json_file.close()
-    model = model_from_json(model_json)
-    model.load_weights(h5_name)
     return model
 
 
@@ -76,30 +55,37 @@ def use_fit(model, size, start=0, save=SAVE_NAME):
     model.save_weights(save)
 
 
-def generate_input(path):
+def generate_input(path, batch_size):
     directory = os.listdir(path)
     index = 0
     total = len(directory)
-    while index < total:
+    while True:
+        # Get at least one sample
+        i = 1
         input_array = np.load(os.path.join(path, directory[index]))
         output_array = np.load(os.path.join(path, directory[index + 1]))
         sample_weights = np.load(os.path.join(path, directory[index + 2]))
-        index += 3
-        yield (input_array, output_array, sample_weights)
+        index = (index + 3) % total
+        # Increase size until batch_size is reached
+        while i < batch_size:
+            input_array = np.append(input_array, np.load(os.path.join(path, directory[index])), 0)
+            output_array = np.append(output_array, np.load(os.path.join(path, directory[index + 1])), 0)
+            sample_weights = np.append(sample_weights, np.load(os.path.join(path, directory[index + 2])), 0)
+            index = (index + 3) % total
+            i += 1
+        yield input_array, output_array, sample_weights
 
 
 if __name__ == '__main__':
-    m = build_model()
-    m.load_weights(LOAD_NAME)
-    dataset_size = TRAIN_SIZE * (len(os.listdir(CNN_INPUT_DIR)) / 3)
-    m.fit_generator(generate_input(CNN_INPUT_DIR), 20000, EPOCHS)
+    with tf.device('/gpu:0'):
+        m = build_model()
+        m.load_weights("model_ep5.h5")
+        dataset_size = len(os.listdir(CNN_INPUT_DIR)) / 3
 
-    m.save_weights("model_20k.h5")
+        checkpoint = ModelCheckpoint("model.h5", monitor='val_loss', verbose=1, save_best_only=False,
+                                     save_weights_only=True, mode='auto', period=1)
+        callbacks = [checkpoint]
 
-    # m.load_weights(LOAD_NAME)
-    #
-    # part = 1
-    #
-    # while part < 5:
-    #     use_fit(m, 5000, 5000*part, SAVE_NAME + str(part) + ".h5")
-    #     part += 1
+        m.fit_generator(generate_input(CNN_INPUT_DIR, BATCH_SIZE), (TRAIN_SIZE*dataset_size) // BATCH_SIZE, EPOCHS,
+                        validation_steps=((1 - TRAIN_SIZE)*dataset_size) // BATCH_SIZE, callbacks=callbacks,
+                        max_queue_size=10)

@@ -1,4 +1,4 @@
-models/
-vectors/
+first_model/models/
+first_model/vectors/
 .idea/
 __pycache__/

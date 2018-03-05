@@ -14,5 +14,5 @@ Please download the files and put the data in a new folder `data/`.
 To reproduce the results please run `python3 script/train.py`. This will train the system for 30,000 training iterations.
 
 ## Testing
-
+The saved weights can be found in the folder `model`.
 To run the testing please run `python3 script/test.py`. 

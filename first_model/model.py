@@ -3,7 +3,7 @@ import os
 import numpy as np
 from keras.callbacks import ModelCheckpoint
 import tensorflow as tf
-from reverse_input import reverse_input
+from first_model.reverse_input import reverse_input
 
 CNN_INPUT_DIR = "D:\\cnn_stories_vectorized_100"
 BATCH_SIZE = 1

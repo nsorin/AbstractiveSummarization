@@ -1,7 +1,7 @@
 # This script generates a vocabulary of word vectors by reading the CNN/Dailymail dataset.
 
 from gensim import models
-from sentence import SentenceReader
+from first_model.sentence import SentenceReader
 import os
 
 

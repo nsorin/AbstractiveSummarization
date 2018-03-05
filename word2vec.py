@@ -1,3 +1,5 @@
+# This script generates a vocabulary of word vectors by reading the CNN/Dailymail dataset.
+
 from gensim import models
 from sentence import SentenceReader
 import os
@@ -19,7 +21,7 @@ def train_low_memory():
 
 
 # Train a word2vec model with high memory usage (more efficient with enough RAM. Memory usage depends on dataset size.)
-# For cnn-dailymail dataset, uses up to 14GB of Memory
+# For cnn-dailymail dataset and dimension of 100, uses up to 14GB of Memory.
 def train_high_memory():
     cnn_files = os.listdir(CNN_TOKENS_PATH)
     dm_files = os.listdir(DM_TOKENS_PATH)
@@ -41,10 +43,8 @@ def train_high_memory():
             print("Read: DM " + file)
 
     model = models.Word2Vec(tokens, size=VECTOR_LENGTH, window=WINDOW, min_count=MIN_COUNT)
-    model.save('models/cnn_dm_model_' + str(VECTOR_LENGTH) + "_" + str(WINDOW) + "_" + str(MIN_COUNT))
     model.wv.save('vectors/cnn_dm_vectors_' + str(VECTOR_LENGTH) + "_" + str(WINDOW) + "_" + str(MIN_COUNT))
 
+
 # train_low_memory()
-
-
 train_high_memory()

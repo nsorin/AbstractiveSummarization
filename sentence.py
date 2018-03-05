@@ -1,3 +1,5 @@
+# This class is used as an iterator by word2vec.py to iterate through the source files.
+
 import os
 
 
@@ -7,10 +9,11 @@ class SentenceReader:
         self.dir_list = dir_list
 
     def __iter__(self):
-        for dir in self.dir_list:
-            for name in os.listdir(dir):
-                for line in open(os.path.join(dir, name), errors="ignore"):
+        for directory in self.dir_list:
+            for name in os.listdir(directory):
+                for line in open(os.path.join(directory, name), errors="ignore"):
+                    # Ignore blank lines and "@highlight" markers
                     if line and line != "\n" and line != "@highlight\n":
                         yield line.split(' ')
-                print('Read: ' + dir + " " + name)
-            print('Read directory: ' + dir)
+                print('Read: ' + directory + " " + name)
+            print('Read directory: ' + directory)

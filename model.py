@@ -9,7 +9,7 @@ CNN_INPUT_DIR = "D:\\cnn_stories_vectorized_100"
 BATCH_SIZE = 1
 INPUT_DIM = 100
 OUTPUT_DIM = 100
-HIDDEN_DIM = 100
+HIDDEN_DIM = 40
 DEPTH = 1
 EPOCHS = 10
 
@@ -55,32 +55,32 @@ def create_input_array(path, size, start=0):
 
 def test_model(path, i_test, model):
     directory = os.listdir(path)
-    test_file = directory[i_test]
-    print("Testing on:", test_file)
-    input_array = np.load(os.path.join(path, test_file))
-    reverse_input(input_array[0])
-    print("Result:")
-    prediction = model.predict(input_array)
-    reverse_input(prediction[0])
+    i = i_test
+    while i < len(directory):
+        # print("Testing on:", test_file)
+        test_file = directory[i]
+        input_array = np.load(os.path.join(path, test_file))
+        # reverse_input(input_array[0])
+        # print("Result:")
+        prediction = model.predict(input_array)
+        reverse_input(prediction[0])
+        i += 3
 
 
-def use_fit(model, size, start=0, save=SAVE_NAME):
-    input_array, output_array, weights_array = create_input_array(CNN_INPUT_DIR, size, start)
-    print("Input is ready!")
-    model.fit(x=input_array, y=output_array, batch_size=BATCH_SIZE, epochs=EPOCHS, sample_weight=weights_array)
-    model.save_weights(save)
-
-
+# The generator function used to feed samples to the model. Since our dataset is too big to be loaded into memory, we
+# must use an iterative approach.
 def generate_input(path, batch_size):
     directory = os.listdir(path)
     index = 0
     total = len(directory)
+    # The generator should yield samples indefinitely
     while True:
         # Get at least one sample
         i = 1
         input_array = np.load(os.path.join(path, directory[index]))
         output_array = np.load(os.path.join(path, directory[index + 1]))
         sample_weights = np.load(os.path.join(path, directory[index + 2]))
+        # If all the data has been yielded, go back to the first sample.
         index = (index + 3) % total
         # Increase size until batch_size is reached
         while i < batch_size:
@@ -95,15 +95,16 @@ def generate_input(path, batch_size):
 if __name__ == '__main__':
     with tf.device('/cpu:0'):
         m = build_model()
-        m.load_weights("model2_ep7.h5")
+        m.load_weights("model1.h5")
+        # m.load_weights("model2.h5")
+        # m.load_weights("model3.h5")
+
         dataset_size = len(os.listdir(CNN_INPUT_DIR)) / 3
 
-        checkpoint = ModelCheckpoint("model2.h5", monitor='val_loss', verbose=1, save_best_only=False,
+        checkpoint = ModelCheckpoint("model1.h5", monitor='val_loss', verbose=1, save_best_only=False,
                                      save_weights_only=True, mode='auto', period=1)
         callbacks = [checkpoint]
 
         m.fit_generator(generate_input(CNN_INPUT_DIR, BATCH_SIZE), (TRAIN_SIZE*dataset_size) // BATCH_SIZE, EPOCHS,
                         validation_steps=((1 - TRAIN_SIZE)*dataset_size) // BATCH_SIZE, callbacks=callbacks,
                         max_queue_size=10)
-
-        # test_model(CNN_INPUT_DIR, int((TRAIN_SIZE * dataset_size + 50) * 3), m)

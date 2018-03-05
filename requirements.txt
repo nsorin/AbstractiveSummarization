@@ -1,3 +1,4 @@
+pyrouge
 numpy
 tensorflow
 tensorflow-gpu

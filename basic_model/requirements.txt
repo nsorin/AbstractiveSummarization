@@ -1,0 +1,8 @@
+pyrouge
+numpy
+tensorflow
+tensorflow-gpu
+keras==2.1.0
+gensim
+git+https://github.com/farizrahman4u/seq2seq.git
+git+https://github.com/farizrahman4u/recurrentshop.git
